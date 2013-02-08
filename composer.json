@@ -32,7 +32,9 @@
         "vipsoft/doctrine-data-fixtures-extension": "*",
         
         "friendsofsymfony/rest-bundle" : "dev-master",
-        "jms/serializer-bundle": "1.0.*"
+        "jms/serializer-bundle": "1.0.*",
+
+         "sanpi/behatch-contexts": "*"
     },
     "scripts": {
         "post-install-cmd": [

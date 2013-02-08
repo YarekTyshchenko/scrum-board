@@ -14,13 +14,7 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 
 use itsallagile\CoreBundle\Entity\User;
-
-//
-// Require 3rd-party libraries here:
-//
-//   require_once 'PHPUnit/Autoload.php';
-//   require_once 'PHPUnit/Framework/Assert/Functions.php';
-//
+use Sanpi\Behatch\Context\BehatchContext;
 
 /**
  * Feature context.
@@ -38,6 +32,7 @@ class FeatureContext extends MinkContext implements KernelAwareInterface
     public function __construct(array $parameters)
     {
         $this->parameters = $parameters;
+        $this->useContext('behatch', new BehatchContext($parameters));
     }
 
     /**
@@ -51,30 +46,12 @@ class FeatureContext extends MinkContext implements KernelAwareInterface
         $this->kernel = $kernel;
     }
 
-    public function getEntityManager()
-    {
-        return $this->kernel->getContainer()->get('doctrine.orm.entity_manager');
-    }
-
     /**
      * @Given /^I have an account$/
      */
     public function iHaveAnAccount()
     {
-        $email = 'behat@example.com';
-        $em = $this->getEntityManager();
-        $user = $em->getRepository('itsallagileCoreBundle:User')->findBy(array('email' => $email));
-        if (!$user) {
-            $user = new User();
-            $user->setEmail($email);
-            $user->setFullName('Behat User');
-            $factory = $this->kernel->getContainer()->get('security.encoder_factory');
-            $encoder = $factory->getEncoder($user);
-            $password = $encoder->encodePassword('password', $user->getSalt());
-            $user->setPassword($password);
-            $em->persist($user);
-            $em->flush();
-        }
+        $email = 'init@example.com';
     }
 
     /**
@@ -84,7 +61,7 @@ class FeatureContext extends MinkContext implements KernelAwareInterface
     {
         return array(
             new Step\When('I am on "/login"'),
-            new Step\When('I fill in "email" with "behat@example.com"'),
+            new Step\When('I fill in "email" with "init@example.com"'),
             new Step\When('I fill in "Password" with "password"'),
             new Step\When('I press "Login"'),
         );
@@ -112,7 +89,16 @@ class FeatureContext extends MinkContext implements KernelAwareInterface
             new Step\When('I am on "/boards/add"'),
             new Step\When('I fill in "Name" with "' . $boardName . '"'),
             new Step\When('I fill in "Slug" with "' . strtolower(str_replace(' ', '', $boardName)) . '"'),
+            new Step\When('I select "A-Team" from "Team"'),
             new Step\When('I press "Add"'),
         );
+    }
+
+    /**
+     * @Then /^I should dump the page$/
+     */
+    public function iShouldDumpThePage()
+    {
+        print_r($this->getSession()->getPage()->getText());
     }
 }
